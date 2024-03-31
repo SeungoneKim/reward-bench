@@ -145,7 +145,7 @@ def main():
         "batch_size": BATCH_SIZE,  # eval_args.inference_batch_size,
         "truncation": True,
         "padding": True,
-        "max_length": 2048,
+        "max_length": 8192,
         "function_to_apply": "none",  # Compute raw logits
         "return_token_type_ids": False,
     }
@@ -158,7 +158,7 @@ def main():
     else:
         model_kwargs = {"device_map": {"": current_device}}
 
-    model = model_builder(args.model, **model_kwargs, trust_remote_code=trust_remote_code)
+    model = model_builder(args.model, **model_kwargs, trust_remote_code=trust_remote_code, cache_dir="./cache")
     reward_pipe = pipeline_builder(
         "text-classification",
         model=model,

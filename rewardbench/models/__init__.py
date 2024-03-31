@@ -33,6 +33,7 @@ from .starling import (
     build_starling_rm,
 )
 from .ziya import ZiyaPipeline
+from .prometheus import PrometheusPipeline
 
 # Please open a PR if you need to add more custom modeling code / utilize existing code for you model
 REWARD_MODEL_CONFIG = {
@@ -105,6 +106,20 @@ REWARD_MODEL_CONFIG = {
         "quantized": True,
         "custom_dialogue": False,
         "model_type": "Seq. Classifier",
+    },
+    "kaist-ai/prometheus-7b-v2.0": {
+        "model_builder": AutoModelForCausalLM.from_pretrained,
+        "pipeline_builder": PrometheusPipeline,
+        "quantized": False,
+        "custom_dialogue": False,
+        "model_type": "Custom Classifier",
+    },
+    "kaist-ai/prometheus-8x7b-v2.0": {
+        "model_builder": AutoModelForCausalLM.from_pretrained,
+        "pipeline_builder": PrometheusPipeline,
+        "quantized": False,
+        "custom_dialogue": False,
+        "model_type": "Custom Classifier",
     },
 }
 

@@ -175,3 +175,5 @@ beaker_configs/auto_created
 # generated local directory
 hf_snapshot_evals/
 data/
+
+cache/
