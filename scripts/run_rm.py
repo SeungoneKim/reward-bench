@@ -158,7 +158,7 @@ def main():
     else:
         model_kwargs = {"device_map": {"": current_device}}
 
-    model = model_builder(args.model, **model_kwargs, trust_remote_code=trust_remote_code, cache_dir="./cache")
+    model = model_builder(args.model, **model_kwargs, trust_remote_code=trust_remote_code, cache_dir="./cache", device_map="auto")
     reward_pipe = pipeline_builder(
         "text-classification",
         model=model,
@@ -235,6 +235,13 @@ def main():
                 [results.append(1) if result else results.append(0) for result in results_sub.cpu().numpy().tolist()]
                 scores_chosen.extend([None] * len(results_sub))
                 scores_rejected.extend([None] * len(results_sub))
+            elif model_type == "Generative RM":
+                text_rejected = batch["text_rejected"]
+                text_chosen = batch["text_chosen"]
+                results_sub = reward_pipe(text_chosen, text_rejected, **reward_pipeline_kwargs)
+                [results.append(1) if result else results.append(0) for result in results_sub.cpu().numpy().tolist()]
+                scores_chosen.extend([None] * len(results_sub))
+                scores_rejected.extend([None] * len(results_sub))
             else:
                 rewards_chosen = reward_pipe(batch["text_chosen"], **reward_pipeline_kwargs)
                 rewards_rejected = reward_pipe(batch["text_rejected"], **reward_pipeline_kwargs)
@@ -290,27 +297,27 @@ def main():
     ############################
     # Upload results to hub
     ############################
-    sub_path = "eval-set/" if not args.pref_sets else "pref-sets/"
-    results_url = save_to_hub(
-        results_grouped, args.model, sub_path, args.debug, local_only=args.do_not_save, save_metrics_for_beaker=True
-    )
-    if not args.do_not_save:
-        logger.info(f"Uploaded reward model results to {results_url}")
+    # sub_path = "eval-set/" if not args.pref_sets else "pref-sets/"
+    # results_url = save_to_hub(
+    #     results_grouped, args.model, sub_path, args.debug, local_only=args.do_not_save, save_metrics_for_beaker=True
+    # )
+    # if not args.do_not_save:
+    #     logger.info(f"Uploaded reward model results to {results_url}")
 
     # upload chosen-rejected with scores
-    if not model_type == "Custom Classifier":  # custom classifiers do not return scores
-        # create new json with scores and upload
-        scores_dict = out_dataset.to_dict()
-        scores_dict["model"] = args.model
-        scores_dict["model_type"] = model_type
-        scores_dict["chat_template"] = args.chat_template
+    # if not model_type == "Custom Classifier":  # custom classifiers do not return scores
+    #     # create new json with scores and upload
+    #     scores_dict = out_dataset.to_dict()
+    #     scores_dict["model"] = args.model
+    #     scores_dict["model_type"] = model_type
+    #     scores_dict["chat_template"] = args.chat_template
 
-        sub_path_scores = "eval-set-scores/" if not args.pref_sets else "pref-sets-scores/"
+    #     sub_path_scores = "eval-set-scores/" if not args.pref_sets else "pref-sets-scores/"
 
-        scores_url = save_to_hub(scores_dict, args.model, sub_path_scores, args.debug)
-        logger.info(f"Uploading chosen-rejected text with scores to {scores_url}")
-    else:
-        logger.info("Not uploading chosen-rejected text with scores due to model compatibility")
+    #     scores_url = save_to_hub(scores_dict, args.model, sub_path_scores, args.debug)
+    #     logger.info(f"Uploading chosen-rejected text with scores to {scores_url}")
+    # else:
+    #     logger.info("Not uploading chosen-rejected text with scores due to model compatibility")
 
 
 if __name__ == "__main__":

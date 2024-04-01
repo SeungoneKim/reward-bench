@@ -112,14 +112,14 @@ REWARD_MODEL_CONFIG = {
         "pipeline_builder": PrometheusPipeline,
         "quantized": False,
         "custom_dialogue": False,
-        "model_type": "Custom Classifier",
+        "model_type": "Generative RM",
     },
     "kaist-ai/prometheus-8x7b-v2.0": {
         "model_builder": AutoModelForCausalLM.from_pretrained,
         "pipeline_builder": PrometheusPipeline,
         "quantized": False,
         "custom_dialogue": False,
-        "model_type": "Custom Classifier",
+        "model_type": "Generative RM",
     },
 }
 
